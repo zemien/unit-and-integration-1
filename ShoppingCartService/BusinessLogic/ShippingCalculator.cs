@@ -52,7 +52,7 @@ namespace ShoppingCartService.BusinessLogic
             return CalculateShippingMethodCost(addressCost, cart.ShippingMethod, cart.CustomerType);
         }
 
-        private double CalculateShippingMethodCost(double baseCost, ShippingMethod shippingMethod,
+        internal double CalculateShippingMethodCost(double baseCost, ShippingMethod shippingMethod,
             CustomerType customerType)
         {
             if (customerType == CustomerType.Premium)
@@ -66,7 +66,7 @@ namespace ShoppingCartService.BusinessLogic
             return baseCost * _shippingIncreaseBasedOnShippingMethod[shippingMethod];
         }
 
-        private static double CalculateTravelCost(Address origin, Address destination, uint numberOfItems)
+        internal static double CalculateTravelCost(Address origin, Address destination, uint numberOfItems)
         {
             var sameCountry = origin.Country == destination.Country;
             if (sameCountry)
