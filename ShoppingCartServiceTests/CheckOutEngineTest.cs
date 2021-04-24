@@ -1,9 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using AutoMapper;
 using FakeItEasy;
 using ShoppingCartService.BusinessLogic;
 using ShoppingCartService.DataAccess.Entities;
+using ShoppingCartService.Models;
 using Xunit;
 
 namespace ShoppingCartServiceTests
@@ -26,50 +26,32 @@ namespace ShoppingCartServiceTests
             };
         }
 
-        [Fact]
-        public void NonPremiumCustomerGetsNoDiscount()
+        [InlineData(CustomerType.Standard, 0)]
+        [InlineData(CustomerType.Premium, 10.0)]
+        [Theory]
+        public void CustomerDiscounts(CustomerType customerType, double customerDiscount)
         {
             var cart = CreateMinimalCart();
+            cart.CustomerType = customerType;
             var checkoutEngine = new CheckOutEngine(A.Dummy<IShippingCalculator>(), A.Dummy<IMapper>());
 
             var result = checkoutEngine.CalculateTotals(cart);
 
-            Assert.Equal(0, result.CustomerDiscount);
+            Assert.Equal(customerDiscount, result.CustomerDiscount);
         }
 
-        [Fact]
-        public void PremiumCustomerGets10PercentDiscount()
+        [InlineData(CustomerType.Standard, 200)]
+        [InlineData(CustomerType.Premium, 180)]
+        [Theory]
+        public void CartTotals(CustomerType customerType, double total)
         {
             var cart = CreateMinimalCart();
-            cart.CustomerType = ShoppingCartService.Models.CustomerType.Premium;
+            cart.CustomerType = customerType;
             var checkoutEngine = new CheckOutEngine(A.Dummy<IShippingCalculator>(), A.Dummy<IMapper>());
 
             var result = checkoutEngine.CalculateTotals(cart);
 
-            Assert.Equal(10.0, result.CustomerDiscount);
-        }
-
-        [Fact]
-        public void StandardCustomerTotal()
-        {
-            var cart = CreateMinimalCart();
-            var checkoutEngine = new CheckOutEngine(A.Dummy<IShippingCalculator>(), A.Dummy<IMapper>());
-
-            var result = checkoutEngine.CalculateTotals(cart);
-
-            Assert.Equal(200, result.Total);
-        }
-
-        [Fact]
-        public void PremiumCustomerTotal()
-        {
-            var cart = CreateMinimalCart();
-            cart.CustomerType = ShoppingCartService.Models.CustomerType.Premium;
-            var checkoutEngine = new CheckOutEngine(A.Dummy<IShippingCalculator>(), A.Dummy<IMapper>());
-
-            var result = checkoutEngine.CalculateTotals(cart);
-
-            Assert.Equal(180, result.Total);
+            Assert.Equal(total, result.Total);
         }
     }
 }
